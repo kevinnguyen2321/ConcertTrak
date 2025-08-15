@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  displayName String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  concerts    Concert[]
+
+  @@map("user_profiles")
+}
+
+model Concert {
+  id             Int            @id @default(autoincrement())
+  userProfileId  String         @map("user_profile_id")
+  date           DateTime
+  venue          String
+  city           String
+  rating         Int?
+  notes          String?
+  createdAt      DateTime       @default(now()) @map("created_at")
+  
+  userProfile    UserProfile    @relation(fields: [userProfileId], references: [id])
+  concertArtists ConcertArtist[]
+
+  @@map("concerts")
+}
+
+model Artist {
+  id            String         @id @default(uuid())
+  name          String
+  concertArtists ConcertArtist[]
+  artistGenres  ArtistGenre[]
+
+  @@map("artists")
+}
+
+model ConcertArtist {
+  id        Int      @id @default(autoincrement())
+  concertId Int      @map("concert_id")
+  artistId  String   @map("artist_id")
+  role      String
+  
+  concert   Concert  @relation(fields: [concertId], references: [id])
+  artist    Artist   @relation(fields: [artistId], references: [id])
+
+  @@map("concert_artists")
+}
+
+model Genre {
+  id           Int           @id @default(autoincrement())
+  name         String
+  artistGenres ArtistGenre[]
+
+  @@map("genres")
+}
+
+model ArtistGenre {
+  id       Int     @id @default(autoincrement())
+  artistId String  @map("artist_id")
+  genreId  Int     @map("genre_id")
+  
+  artist   Artist  @relation(fields: [artistId], references: [id])
+  genre    Genre   @relation(fields: [genreId], references: [id])
+
+  @@map("artist_genres")
+}

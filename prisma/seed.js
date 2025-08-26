@@ -24,9 +24,10 @@ async function main() {
 
   console.log('✅ Genres created');
 
-  // Create sample artists
+  // Create sample artists with Spotify-style IDs
   const queen = await prisma.artist.create({
     data: {
+      id: '1dfeR4HaWDbWqFHLkxsg1d', // Queen's actual Spotify ID
       name: 'Queen',
       artistGenres: {
         create: [{ genreId: rock.id }],
@@ -36,6 +37,7 @@ async function main() {
 
   const beatles = await prisma.artist.create({
     data: {
+      id: '3WrFJ7ztbogyGnTHbHJFl2', // The Beatles' actual Spotify ID
       name: 'The Beatles',
       artistGenres: {
         create: [{ genreId: rock.id }, { genreId: pop.id }],
@@ -45,6 +47,7 @@ async function main() {
 
   const milesDavis = await prisma.artist.create({
     data: {
+      id: '0kbYTNQb4Pb1rPbbaF0pT4', // Miles Davis' actual Spotify ID
       name: 'Miles Davis',
       artistGenres: {
         create: [{ genreId: jazz.id }],

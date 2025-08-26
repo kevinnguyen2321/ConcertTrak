@@ -36,7 +36,7 @@ model Concert {
 }
 
 model Artist {
-  id            String         @id @default(uuid())
+  id            String         @id
   name          String
   concertArtists ConcertArtist[]
   artistGenres  ArtistGenre[]

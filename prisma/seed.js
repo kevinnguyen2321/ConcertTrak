@@ -60,7 +60,7 @@ async function main() {
 
   console.log('✅ Artists created');
 
-  // Create sample user
+  // Create sample users
   const john = await prisma.userProfile.create({
     data: {
       email: 'john@example.com',
@@ -68,7 +68,21 @@ async function main() {
     },
   });
 
-  console.log('✅ User created');
+  const sarah = await prisma.userProfile.create({
+    data: {
+      email: 'sarah@example.com',
+      displayName: 'Sarah Johnson',
+    },
+  });
+
+  const mike = await prisma.userProfile.create({
+    data: {
+      email: 'mike@example.com',
+      displayName: 'Mike Wilson',
+    },
+  });
+
+  console.log('✅ Users created');
 
   // Create sample concerts
   const concert1 = await prisma.concert.create({
@@ -95,6 +109,64 @@ async function main() {
       notes: 'Great jazz night, intimate venue.',
       concertArtists: {
         create: [{ artistId: milesDavis.id, role: 'Headliner' }],
+      },
+    },
+  });
+
+  // Create concerts for Sarah
+  const concert3 = await prisma.concert.create({
+    data: {
+      userProfileId: sarah.id,
+      date: new Date('2024-08-10'),
+      venue: 'Red Rocks Amphitheatre',
+      city: 'Morrison',
+      rating: 5,
+      notes: 'Incredible venue! The Beatles tribute was fantastic.',
+      concertArtists: {
+        create: [{ artistId: beatles.id, role: 'Headliner' }],
+      },
+    },
+  });
+
+  const concert4 = await prisma.concert.create({
+    data: {
+      userProfileId: sarah.id,
+      date: new Date('2024-09-05'),
+      venue: 'Blue Note',
+      city: 'New York',
+      rating: 4,
+      notes: 'Intimate jazz experience, loved every minute.',
+      concertArtists: {
+        create: [{ artistId: milesDavis.id, role: 'Headliner' }],
+      },
+    },
+  });
+
+  // Create concerts for Mike
+  const concert5 = await prisma.concert.create({
+    data: {
+      userProfileId: mike.id,
+      date: new Date('2024-05-25'),
+      venue: 'Wembley Stadium',
+      city: 'London',
+      rating: 5,
+      notes: 'Queen at Wembley - bucket list concert!',
+      concertArtists: {
+        create: [{ artistId: queen.id, role: 'Headliner' }],
+      },
+    },
+  });
+
+  const concert6 = await prisma.concert.create({
+    data: {
+      userProfileId: mike.id,
+      date: new Date('2024-10-12'),
+      venue: 'Abbey Road Studios',
+      city: 'London',
+      rating: 3,
+      notes: 'Cool experience but short set.',
+      concertArtists: {
+        create: [{ artistId: beatles.id, role: 'Headliner' }],
       },
     },
   });

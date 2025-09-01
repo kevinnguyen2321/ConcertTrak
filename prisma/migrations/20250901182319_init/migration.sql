@@ -26,6 +26,7 @@ CREATE TABLE "public"."concerts" (
 CREATE TABLE "public"."artists" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "imageUrl" TEXT,
 
     CONSTRAINT "artists_pkey" PRIMARY KEY ("id")
 );

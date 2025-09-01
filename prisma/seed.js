@@ -29,6 +29,7 @@ async function main() {
     data: {
       id: '1dfeR4HaWDbWqFHLkxsg1d', // Queen's actual Spotify ID
       name: 'Queen',
+      imageUrl: null, // Will be populated from Spotify API later
       artistGenres: {
         create: [{ genreId: rock.id }],
       },
@@ -39,6 +40,7 @@ async function main() {
     data: {
       id: '3WrFJ7ztbogyGnTHbHJFl2', // The Beatles' actual Spotify ID
       name: 'The Beatles',
+      imageUrl: null, // Will be populated from Spotify API later
       artistGenres: {
         create: [{ genreId: rock.id }, { genreId: pop.id }],
       },
@@ -49,6 +51,7 @@ async function main() {
     data: {
       id: '0kbYTNQb4Pb1rPbbaF0pT4', // Miles Davis' actual Spotify ID
       name: 'Miles Davis',
+      imageUrl: null, // Will be populated from Spotify API later
       artistGenres: {
         create: [{ genreId: jazz.id }],
       },

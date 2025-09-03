@@ -15,6 +15,7 @@ export async function GET(request) {
     const concerts = await prisma.concert.findMany({
       where: whereClause,
       include: {
+        userProfile: true, // Include user profile details
         concertArtists: {
           include: {
             artist: true, // Include artist details

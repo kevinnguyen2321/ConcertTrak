@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export default function Feed() {
   const [concerts, setConcerts] = useState([]);
@@ -14,10 +14,10 @@ export default function Feed() {
   const fetchConcerts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/concerts');
+      const response = await fetch("/api/concerts");
 
       if (!response.ok) {
-        throw new Error('Failed to fetch concerts');
+        throw new Error("Failed to fetch concerts");
       }
 
       const data = await response.json();
@@ -30,10 +30,10 @@ export default function Feed() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -42,7 +42,7 @@ export default function Feed() {
       <svg
         key={index}
         className={`w-4 h-4 ${
-          index < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+          index < rating ? "text-yellow-400 fill-current" : "text-gray-300"
         }`}
         viewBox="0 0 20 20"
       >
@@ -164,9 +164,9 @@ export default function Feed() {
                   <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-medium text-sm">
                       {concert.userProfile.displayName
-                        .split(' ')
+                        .split(" ")
                         .map((n) => n[0])
-                        .join('')}
+                        .join("")}
                     </span>
                   </div>
                   <div>
@@ -184,7 +184,7 @@ export default function Feed() {
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">
                     {concert.concertArtists
                       .map((ca) => ca.artist.name)
-                      .join(', ')}
+                      .join(", ")}
                   </h2>
                   <div className="text-gray-600 space-y-1">
                     <p className="flex items-center">

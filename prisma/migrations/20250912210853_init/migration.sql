@@ -65,7 +65,7 @@ CREATE UNIQUE INDEX "user_profiles_email_key" ON "public"."user_profiles"("email
 ALTER TABLE "public"."concerts" ADD CONSTRAINT "concerts_user_profile_id_fkey" FOREIGN KEY ("user_profile_id") REFERENCES "public"."user_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."concert_artists" ADD CONSTRAINT "concert_artists_concert_id_fkey" FOREIGN KEY ("concert_id") REFERENCES "public"."concerts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."concert_artists" ADD CONSTRAINT "concert_artists_concert_id_fkey" FOREIGN KEY ("concert_id") REFERENCES "public"."concerts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."concert_artists" ADD CONSTRAINT "concert_artists_artist_id_fkey" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

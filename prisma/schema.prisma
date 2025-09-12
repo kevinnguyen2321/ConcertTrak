@@ -51,7 +51,7 @@ model ConcertArtist {
   artistId  String   @map("artist_id")
   role      String
   
-  concert   Concert  @relation(fields: [concertId], references: [id])
+  concert   Concert  @relation(fields: [concertId], references: [id], onDelete: Cascade)
   artist    Artist   @relation(fields: [artistId], references: [id])
 
   @@map("concert_artists")

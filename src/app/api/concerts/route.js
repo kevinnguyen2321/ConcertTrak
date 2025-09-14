@@ -64,6 +64,31 @@ export async function POST(request) {
       );
     }
 
+    // Validate artists array
+    if (!artists || !Array.isArray(artists) || artists.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "At least one artist is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Filter valid artists
+    const validArtists = artists.filter(
+      (artist) => artist.artistId && artist.role
+    );
+    if (validArtists.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "All artists must have both artist ID and role",
+        },
+        { status: 400 }
+      );
+    }
+
     // Verify user profile exists
     const userProfile = await prisma.userProfile.findUnique({
       where: { id: userProfileId },
@@ -93,25 +118,21 @@ export async function POST(request) {
         },
       });
 
-      // If artists are provided, create concert artists
-      if (artists && Array.isArray(artists)) {
-        for (const artist of artists) {
-          if (artist.artistId && artist.role) {
-            // Verify artist exists
-            const existingArtist = await tx.artist.findUnique({
-              where: { id: artist.artistId },
-            });
+      // Create concert artists from valid artists
+      for (const artist of validArtists) {
+        // Verify artist exists
+        const existingArtist = await tx.artist.findUnique({
+          where: { id: artist.artistId },
+        });
 
-            if (existingArtist) {
-              await tx.concertArtist.create({
-                data: {
-                  concertId: newConcert.id,
-                  artistId: artist.artistId,
-                  role: artist.role,
-                },
-              });
-            }
-          }
+        if (existingArtist) {
+          await tx.concertArtist.create({
+            data: {
+              concertId: newConcert.id,
+              artistId: artist.artistId,
+              role: artist.role,
+            },
+          });
         }
       }
 

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
+import LoginForm from "../components/LoginForm";
 
 export default function MyShowsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [concerts, setConcerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,19 +54,12 @@ export default function MyShowsPage() {
     return "★".repeat(rating) + "☆".repeat(5 - rating);
   };
 
+  const handleConcertClick = (concertId) => {
+    router.push(`/concerts/${concertId}`);
+  };
+
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Please log in to view your shows
-          </h1>
-          <p className="text-gray-600">
-            You need to be logged in to see your concert history.
-          </p>
-        </div>
-      </div>
-    );
+    return <LoginForm />;
   }
 
   if (loading) {
@@ -161,7 +157,8 @@ export default function MyShowsPage() {
             {concerts.map((concert) => (
               <div
                 key={concert.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                onClick={() => handleConcertClick(concert.id)}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow duration-200"
               >
                 <div className="p-6">
                   {/* Concert Header */}
@@ -227,13 +224,6 @@ export default function MyShowsPage() {
                       </p>
                     </div>
                   )}
-
-                  {/* Concert Meta */}
-                  <div className="border-t border-gray-200 pt-4 mt-4">
-                    <p className="text-xs text-gray-500">
-                      Added on {formatDate(concert.createdAt)}
-                    </p>
-                  </div>
                 </div>
               </div>
             ))}

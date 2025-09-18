@@ -79,6 +79,23 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const { date, venue, city, rating, notes, userProfileId, artists } = body;
 
+    // Coerce rating to int or null
+    const parsedRating =
+      rating === "" || rating === null || rating === undefined
+        ? null
+        : parseInt(rating, 10);
+
+    // Validate rating
+    if (
+      parsedRating !== null &&
+      (Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5)
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Rating must be between 1-5 or empty" },
+        { status: 400 }
+      );
+    }
+
     // Validate required fields
     if (!date || !venue || !city || !userProfileId) {
       return NextResponse.json(
@@ -111,10 +128,10 @@ export async function PUT(request, { params }) {
       const updatedConcert = await tx.concert.update({
         where: { id: concertId },
         data: {
-          date: new Date(date),
+          date: new Date(date + ":00.000Z"),
           venue,
           city,
-          rating: rating || null,
+          rating: parsedRating,
           notes: notes || null,
           userProfileId,
         },

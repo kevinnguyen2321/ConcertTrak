@@ -16,6 +16,8 @@ export default function ConcertDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const isOwner =
+    concert?.userProfileId && user?.id && concert.userProfileId === user.id;
 
   useEffect(() => {
     if (user && params.id) {
@@ -51,6 +53,7 @@ export default function ConcertDetailPage() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "UTC",
     });
   };
 
@@ -89,8 +92,11 @@ export default function ConcertDetailPage() {
         return;
       }
 
+      // Coerce types before sending
       const concertData = {
         ...editFormData,
+        rating:
+          editFormData.rating === "" ? null : parseInt(editFormData.rating, 10),
         artists: validArtists,
       };
 
@@ -310,45 +316,47 @@ export default function ConcertDetailPage() {
                     </div>
                   )}
                   {/* Edit and Delete Actions */}
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={handleEditClick}
-                      className="p-2 text-blue-100 hover:text-white hover:bg-blue-800 rounded-lg transition-colors"
-                      title="Edit concert"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                  {isOwner && (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleEditClick}
+                        className="p-2 text-blue-100 hover:text-white hover:bg-blue-800 rounded-lg transition-colors"
+                        title="Edit concert"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      className="p-2 text-blue-100 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
-                      title="Delete concert"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        className="p-2 text-blue-100 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
+                        title="Delete concert"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

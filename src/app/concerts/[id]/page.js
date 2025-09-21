@@ -16,6 +16,8 @@ export default function ConcertDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const isOwner =
     concert?.userProfileId && user?.id && concert.userProfileId === user.id;
 
@@ -72,6 +74,40 @@ export default function ConcertDetailPage() {
     setIsEditing(false);
     setSaveSuccess(false);
     setError("");
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      setDeleting(true);
+      setError("");
+
+      const concertId = parseInt(params.id);
+      const response = await fetch(`/api/concerts/${concertId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setShowDeleteModal(false);
+        // Redirect to my-shows page with success message
+        router.push("/my-shows?deleted=true");
+      } else {
+        setError(result.error || "Failed to delete concert");
+      }
+    } catch (error) {
+      setError("Network error. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   const handleSaveChanges = async (editFormData) => {
@@ -338,6 +374,7 @@ export default function ConcertDetailPage() {
                         </svg>
                       </button>
                       <button
+                        onClick={handleDeleteClick}
                         className="p-2 text-blue-100 hover:text-white hover:bg-red-600 rounded-lg transition-colors"
                         title="Delete concert"
                       >
@@ -437,6 +474,58 @@ export default function ConcertDetailPage() {
 
       {/* Bottom padding to account for fixed navbar */}
       <div className="h-20"></div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Delete Concert
+                </h3>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-sm text-gray-500">
+                Are you sure you want to delete this concert? This action cannot
+                be undone.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

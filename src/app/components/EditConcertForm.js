@@ -11,7 +11,7 @@ export default function EditConcertForm({
   error,
 }) {
   const [editFormData, setEditFormData] = useState({
-    date: new Date(concert.date).toISOString().slice(0, 16),
+    date: concert.date.slice(0, 16),
     venue: concert.venue,
     city: concert.city,
     rating: concert.rating || "",
@@ -150,7 +150,7 @@ export default function EditConcertForm({
           {/* Artists */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Artists *
+              Artist *
             </label>
             {editFormData.artists?.map((artist, index) => (
               <div key={index} className="flex gap-2 mb-2">
@@ -161,6 +161,7 @@ export default function EditConcertForm({
                   onChange={(e) =>
                     handleArtistChange(index, "artistId", e.target.value)
                   }
+                  required
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
                 <input
@@ -170,6 +171,7 @@ export default function EditConcertForm({
                   onChange={(e) =>
                     handleArtistChange(index, "role", e.target.value)
                   }
+                  required
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
                 {editFormData.artists.length > 1 && (

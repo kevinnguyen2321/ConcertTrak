@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET /api/concerts/[id] - Get concert by ID
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const concertId = parseInt(id);
 
     if (isNaN(concertId)) {
@@ -63,7 +63,7 @@ export async function GET(request, { params }) {
 // PUT /api/concerts/[id] - Update concert by ID
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const concertId = parseInt(id);
 
     if (isNaN(concertId)) {
@@ -124,11 +124,26 @@ export async function PUT(request, { params }) {
 
     // Start a transaction to update concert and artists
     const result = await prisma.$transaction(async (tx) => {
+      // Parse the date - handle both UTC ISO strings and datetime-local format
+      let parsedDate;
+      if (date.includes("T") && date.includes("Z")) {
+        // Already a UTC ISO string
+        parsedDate = new Date(date);
+      } else {
+        // datetime-local format, convert to UTC
+        parsedDate = new Date(date + ":00.000Z");
+      }
+
+      // Validate the date
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error("Invalid date format");
+      }
+
       // Update the concert
       const updatedConcert = await tx.concert.update({
         where: { id: concertId },
         data: {
-          date: new Date(date + ":00.000Z"),
+          date: parsedDate,
           venue,
           city,
           rating: parsedRating,
@@ -195,7 +210,7 @@ export async function PUT(request, { params }) {
 // DELETE /api/concerts/[id] - Delete concert by ID
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const concertId = parseInt(id);
 
     if (isNaN(concertId)) {

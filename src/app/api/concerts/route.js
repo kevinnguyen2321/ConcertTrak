@@ -53,6 +53,10 @@ export async function POST(request) {
     const body = await request.json();
     const { date, venue, city, rating, notes, userProfileId, artists } = body;
 
+    // Debug: Log the incoming date
+    console.log("POST - Incoming date:", date);
+    console.log("POST - Date type:", typeof date);
+
     // Validate required fields
     if (!date || !venue || !city || !userProfileId) {
       return NextResponse.json(
@@ -106,10 +110,29 @@ export async function POST(request) {
 
     // Start a transaction to create concert and artists
     const result = await prisma.$transaction(async (tx) => {
+      // Parse the date - handle both UTC ISO strings and datetime-local format
+      let parsedDate;
+      if (date.includes("T") && date.includes("Z")) {
+        // Already a UTC ISO string
+        parsedDate = new Date(date);
+        console.log("POST - Using UTC ISO string:", date, "->", parsedDate);
+      } else {
+        // datetime-local format, convert to UTC
+        parsedDate = new Date(date + ":00.000Z");
+        console.log("POST - Using datetime-local:", date, "->", parsedDate);
+      }
+
+      // Validate the date
+      if (isNaN(parsedDate.getTime())) {
+        throw new Error("Invalid date format");
+      }
+
+      console.log("POST - Final parsed date:", parsedDate);
+
       // Create the concert
       const newConcert = await tx.concert.create({
         data: {
-          date: new Date(date),
+          date: parsedDate,
           venue,
           city,
           rating: rating || null,

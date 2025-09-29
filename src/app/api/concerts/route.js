@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { findOrCreateArtist } from "../../../services/artistService.js";
 
 const prisma = new PrismaClient();
 
@@ -79,15 +80,15 @@ export async function POST(request) {
       );
     }
 
-    // Filter valid artists
+    // Filter valid artists (must include a name and role)
     const validArtists = artists.filter(
-      (artist) => artist.artistId && artist.role
+      (artist) => artist?.name && artist?.role
     );
     if (validArtists.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "All artists must have both artist ID and role",
+          error: "All artists must include a name and role",
         },
         { status: 400 }
       );
@@ -106,6 +107,13 @@ export async function POST(request) {
         },
         { status: 404 }
       );
+    }
+
+    // Resolve all artists first (outside transaction)
+    const resolvedArtists = [];
+    for (const a of validArtists) {
+      const resolved = await findOrCreateArtist(a.name);
+      resolvedArtists.push({ artistId: resolved.id, role: a.role });
     }
 
     // Start a transaction to create concert and artists
@@ -141,22 +149,15 @@ export async function POST(request) {
         },
       });
 
-      // Create concert artists from valid artists
-      for (const artist of validArtists) {
-        // Verify artist exists
-        const existingArtist = await tx.artist.findUnique({
-          where: { id: artist.artistId },
+      // Create concert artists from resolved artists
+      for (const artist of resolvedArtists) {
+        await tx.concertArtist.create({
+          data: {
+            concertId: newConcert.id,
+            artistId: artist.artistId,
+            role: artist.role,
+          },
         });
-
-        if (existingArtist) {
-          await tx.concertArtist.create({
-            data: {
-              concertId: newConcert.id,
-              artistId: artist.artistId,
-              role: artist.role,
-            },
-          });
-        }
       }
 
       // Return the created concert with relations

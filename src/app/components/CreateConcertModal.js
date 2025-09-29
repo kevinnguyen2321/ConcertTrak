@@ -11,7 +11,7 @@ export default function CreateConcertModal({ isOpen, onClose }) {
     city: "",
     rating: "",
     notes: "",
-    artists: [{ artistId: "", role: "" }],
+    artists: [{ name: "", role: "" }],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -36,7 +36,7 @@ export default function CreateConcertModal({ isOpen, onClose }) {
   const addArtist = () => {
     setFormData((prev) => ({
       ...prev,
-      artists: [...prev.artists, { artistId: "", role: "" }],
+      artists: [...prev.artists, { name: "", role: "" }],
     }));
   };
 
@@ -55,12 +55,12 @@ export default function CreateConcertModal({ isOpen, onClose }) {
     try {
       // Filter out empty artists
       const validArtists = formData.artists.filter(
-        (artist) => artist.artistId && artist.role
+        (artist) => artist.name && artist.role
       );
 
       // Validate at least one artist exists
       if (validArtists.length === 0) {
-        setError("Please add at least one artist to the concert");
+        setError("Please add at least one artist (name + role)");
         setIsSubmitting(false);
         return;
       }
@@ -93,7 +93,7 @@ export default function CreateConcertModal({ isOpen, onClose }) {
           city: "",
           rating: "",
           notes: "",
-          artists: [{ artistId: "", role: "" }],
+          artists: [{ name: "", role: "" }],
         });
         onClose();
         // You could add a success message here
@@ -229,9 +229,9 @@ export default function CreateConcertModal({ isOpen, onClose }) {
                 <input
                   type="text"
                   placeholder="Artist Name"
-                  value={artist.artistId}
+                  value={artist.name}
                   onChange={(e) =>
-                    handleArtistChange(index, "artistId", e.target.value)
+                    handleArtistChange(index, "name", e.target.value)
                   }
                   required
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"

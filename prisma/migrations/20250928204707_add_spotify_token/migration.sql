@@ -58,6 +58,18 @@ CREATE TABLE "public"."artist_genres" (
     CONSTRAINT "artist_genres_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."spotify_tokens" (
+    "id" TEXT NOT NULL DEFAULT 'main',
+    "accessToken" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "requestedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "spotify_tokens_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "user_profiles_email_key" ON "public"."user_profiles"("email");
 

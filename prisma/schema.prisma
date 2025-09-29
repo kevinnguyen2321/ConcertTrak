@@ -75,3 +75,14 @@ model ArtistGenre {
 
   @@map("artist_genres")
 }
+
+model SpotifyToken {
+  id          String   @id @default("main")
+  accessToken String
+  expiresAt   DateTime
+  requestedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("spotify_tokens")
+}

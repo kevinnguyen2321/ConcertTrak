@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { findOrCreateArtist } from "../../../services/artistService.js";
+import {
+  findOrCreateArtist,
+  findOrCreateGenreAndLink,
+} from "../../../services/artistService.js";
 
 const prisma = new PrismaClient();
 
@@ -69,6 +72,22 @@ export async function POST(request) {
       );
     }
 
+    // Validate rating (allow empty/null, else 1-5)
+    const parsedRating =
+      rating === "" || rating == null ? null : parseInt(rating, 10);
+    if (
+      parsedRating !== null &&
+      (Number.isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Rating must be between 1-5 or empty",
+        },
+        { status: 400 }
+      );
+    }
+
     // Validate artists array
     if (!artists || !Array.isArray(artists) || artists.length === 0) {
       return NextResponse.json(
@@ -112,7 +131,17 @@ export async function POST(request) {
     // Resolve all artists first (outside transaction)
     const resolvedArtists = [];
     for (const a of validArtists) {
+      // 1. Get/create artist from Spotify
       const resolved = await findOrCreateArtist(a.name);
+
+      // 2. Add user-provided genres (if any)
+      if (a.genres && a.genres.length > 0) {
+        for (const genreName of a.genres) {
+          await findOrCreateGenreAndLink(genreName, resolved.id);
+        }
+      }
+
+      // 3. Store for concert creation
       resolvedArtists.push({ artistId: resolved.id, role: a.role });
     }
 
@@ -143,7 +172,7 @@ export async function POST(request) {
           date: parsedDate,
           venue,
           city,
-          rating: rating || null,
+          rating: parsedRating,
           notes: notes || null,
           userProfileId,
         },

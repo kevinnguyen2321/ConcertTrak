@@ -42,25 +42,9 @@ export async function findOrCreateArtist(artistName) {
 async function createArtistWithGenres(spotifyData) {
   const spotifyArtist = spotifyData.artists.items[0];
 
-  // Create the artist
-  const artist = await prisma.artist.create({
-    data: {
-      id: spotifyArtist.id,
-      name: spotifyArtist.name,
-      imageUrl: spotifyArtist.images[0]?.url || null,
-    },
-  });
-
-  // Handle genres
-  if (spotifyArtist.genres && spotifyArtist.genres.length > 0) {
-    for (const genreName of spotifyArtist.genres) {
-      await findOrCreateGenreAndLink(genreName, artist.id);
-    }
-  }
-
-  // Return artist with genres included
-  return await prisma.artist.findUnique({
-    where: { id: artist.id },
+  // Check if artist already exists by Spotify ID
+  let artist = await prisma.artist.findUnique({
+    where: { id: spotifyArtist.id },
     include: {
       artistGenres: {
         include: {
@@ -69,20 +53,78 @@ async function createArtistWithGenres(spotifyData) {
       },
     },
   });
+
+  if (!artist) {
+    // Create the artist only if it doesn't exist
+    artist = await prisma.artist.create({
+      data: {
+        id: spotifyArtist.id,
+        name: spotifyArtist.name,
+        imageUrl: spotifyArtist.images[0]?.url || null,
+      },
+    });
+
+    // Handle genres for newly created artist
+    console.log(
+      `Processing genres for ${spotifyArtist.name}:`,
+      spotifyArtist.genres
+    );
+    if (spotifyArtist.genres && spotifyArtist.genres.length > 0) {
+      for (const genreName of spotifyArtist.genres) {
+        console.log(
+          `Creating/linking genre: ${genreName} for artist: ${artist.id}`
+        );
+        await findOrCreateGenreAndLink(genreName, artist.id);
+      }
+    } else {
+      console.log(`No genres found for ${spotifyArtist.name}`);
+    }
+
+    // Return artist with genres included
+    return await prisma.artist.findUnique({
+      where: { id: artist.id },
+      include: {
+        artistGenres: {
+          include: {
+            genre: true,
+          },
+        },
+      },
+    });
+  } else {
+    // Artist already exists, return it
+    console.log(`Artist ${spotifyArtist.name} already exists in database`);
+    return artist;
+  }
 }
 
 // Find or create genre and link to artist
-async function findOrCreateGenreAndLink(genreName, artistId) {
+export async function findOrCreateGenreAndLink(genreName, artistId) {
   try {
-    // Find or create genre
+    console.log(
+      `Starting genre processing for: ${genreName}, artist: ${artistId}`
+    );
+
+    // Find or create genre (case-insensitive search, lowercase storage)
     let genre = await prisma.genre.findFirst({
-      where: { name: genreName },
+      where: {
+        name: {
+          equals: genreName,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (!genre) {
+      console.log(`Creating new genre: ${genreName}`);
       genre = await prisma.genre.create({
-        data: { name: genreName },
+        data: {
+          name: genreName.toLowerCase(),
+        },
       });
+      console.log(`Created genre with ID: ${genre.id}`);
+    } else {
+      console.log(`Found existing genre: ${genreName} with ID: ${genre.id}`);
     }
 
     // Check if relationship already exists
@@ -95,15 +137,21 @@ async function findOrCreateGenreAndLink(genreName, artistId) {
 
     // Only create if it doesn't exist
     if (!existingLink) {
+      console.log(
+        `Creating artistGenre link: artistId=${artistId}, genreId=${genre.id}`
+      );
       await prisma.artistGenre.create({
         data: {
           artistId: artistId,
           genreId: genre.id,
         },
       });
+      console.log(`Successfully created artistGenre link`);
+    } else {
+      console.log(`ArtistGenre link already exists`);
     }
   } catch (error) {
-    console.error("Error in findOrCreateGenreAndLink:", error);
+    console.error(`Error in findOrCreateGenreAndLink for ${genreName}:`, error);
     // Don't throw error here to avoid breaking artist creation
   }
 }

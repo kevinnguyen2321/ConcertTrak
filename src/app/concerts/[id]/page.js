@@ -414,7 +414,8 @@ export default function ConcertDetailPage() {
                     {concert.userProfile.displayName}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Added on {formatDate(concert.createdAt)}
+                    Member since{" "}
+                    {new Date(concert.userProfile.createdAt).getUTCFullYear()}
                   </p>
                 </div>
               </div>

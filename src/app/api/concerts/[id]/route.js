@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import {
+  findOrCreateArtist,
+  findOrCreateGenreAndLink,
+} from "../../../../services/artistService.js";
 
 const prisma = new PrismaClient();
 
@@ -122,6 +126,45 @@ export async function PUT(request, { params }) {
       );
     }
 
+    // Validate artists array if provided
+    if (artists && Array.isArray(artists)) {
+      const validArtists = artists.filter(
+        (artist) => artist?.name && artist?.role
+      );
+      if (artists.length > 0 && validArtists.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "All artists must include a name and role",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Resolve all artists first (outside transaction)
+    const resolvedArtists = [];
+    if (artists && Array.isArray(artists)) {
+      const validArtists = artists.filter(
+        (artist) => artist?.name && artist?.role
+      );
+
+      for (const a of validArtists) {
+        // 1. Get/create artist from Spotify
+        const resolved = await findOrCreateArtist(a.name);
+
+        // 2. Add user-provided genres (if any)
+        if (a.genres && a.genres.length > 0) {
+          for (const genreName of a.genres) {
+            await findOrCreateGenreAndLink(genreName, resolved.id);
+          }
+        }
+
+        // 3. Store for concert update
+        resolvedArtists.push({ artistId: resolved.id, role: a.role });
+      }
+    }
+
     // Start a transaction to update concert and artists
     const result = await prisma.$transaction(async (tx) => {
       // Parse the date - handle both UTC ISO strings and datetime-local format
@@ -153,23 +196,21 @@ export async function PUT(request, { params }) {
       });
 
       // If artists are provided, update them
-      if (artists && Array.isArray(artists)) {
+      if (resolvedArtists.length > 0) {
         // Delete existing concert artists
         await tx.concertArtist.deleteMany({
           where: { concertId },
         });
 
-        // Create new concert artists
-        for (const artist of artists) {
-          if (artist.artistId && artist.role) {
-            await tx.concertArtist.create({
-              data: {
-                concertId,
-                artistId: artist.artistId,
-                role: artist.role,
-              },
-            });
-          }
+        // Create new concert artists from resolved artists
+        for (const artist of resolvedArtists) {
+          await tx.concertArtist.create({
+            data: {
+              concertId,
+              artistId: artist.artistId,
+              role: artist.role,
+            },
+          });
         }
       }
 

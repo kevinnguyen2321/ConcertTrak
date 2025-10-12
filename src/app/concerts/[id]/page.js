@@ -119,7 +119,7 @@ export default function ConcertDetailPage() {
 
       // Filter out empty artists
       const validArtists = editFormData.artists.filter(
-        (artist) => artist.artistId && artist.role
+        (artist) => artist.name && artist.role
       );
 
       if (validArtists.length === 0) {
@@ -135,6 +135,8 @@ export default function ConcertDetailPage() {
           editFormData.rating === "" ? null : parseInt(editFormData.rating, 10),
         artists: validArtists,
       };
+
+      console.log(concertData);
 
       const response = await fetch(`/api/concerts/${concertId}`, {
         method: "PUT",

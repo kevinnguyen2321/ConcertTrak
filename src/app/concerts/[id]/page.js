@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "../../../contexts/AuthContext";
 import LoginForm from "../../components/LoginForm";
 import EditConcertForm from "../../components/EditConcertForm";
+import ArtistModal from "../../components/ArtistModal";
 
 export default function ConcertDetailPage() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function ConcertDetailPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
   const isOwner =
     concert?.userProfileId && user?.id && concert.userProfileId === user.id;
 
@@ -432,14 +434,26 @@ export default function ConcertDetailPage() {
                     {concert.concertArtists.map((concertArtist, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                        onClick={() => setSelectedArtist(concertArtist.artist)}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-medium text-sm">
-                              {concertArtist.artist.name.charAt(0)}
-                            </span>
-                          </div>
+                          {concertArtist.artist.imageUrl ? (
+                            <img
+                              src={concertArtist.artist.imageUrl}
+                              alt={concertArtist.artist.name}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                              <span className="text-white font-medium text-sm">
+                                {concertArtist.artist.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
                           <div>
                             <h5 className="font-medium text-gray-900">
                               {concertArtist.artist.name}
@@ -529,6 +543,13 @@ export default function ConcertDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Artist Modal */}
+      <ArtistModal
+        artist={selectedArtist}
+        isOpen={!!selectedArtist}
+        onClose={() => setSelectedArtist(null)}
+      />
     </div>
   );
 }

@@ -1,5 +1,34 @@
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import { findOrCreateArtist } from "../../../services/artistService.js";
+
+const prisma = new PrismaClient();
+
+// GET /api/artists - Get all artists
+export async function GET() {
+  try {
+    const artists = await prisma.artist.findMany({
+      include: {
+        artistGenres: {
+          include: {
+            genre: true,
+          },
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    return NextResponse.json(artists);
+  } catch (error) {
+    console.error("Error fetching artists:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch artists" },
+      { status: 500 }
+    );
+  }
+}
 
 // POST /api/artists - Create or find an artist
 export async function POST(request) {

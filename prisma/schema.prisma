@@ -70,7 +70,7 @@ model ArtistGenre {
   artistId String  @map("artist_id")
   genreId  Int     @map("genre_id")
   
-  artist   Artist  @relation(fields: [artistId], references: [id])
+  artist   Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
   genre    Genre   @relation(fields: [genreId], references: [id])
 
   @@map("artist_genres")

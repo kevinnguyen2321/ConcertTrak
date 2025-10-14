@@ -29,7 +29,15 @@ export async function GET(request, { params }) {
         userProfile: true,
         concertArtists: {
           include: {
-            artist: true,
+            artist: {
+              include: {
+                artistGenres: {
+                  include: {
+                    genre: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

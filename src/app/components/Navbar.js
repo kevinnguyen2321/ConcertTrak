@@ -1,25 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "../../contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function Navbar() {
-  const { user, signOut } = useAuth();
+export default function Navbar({ user }) {
+  const router = useRouter();
+  const supabase = createClient();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true);
   };
 
   const handleConfirmLogout = async () => {
-    await signOut();
+    await supabase.auth.signOut();
     setShowLogoutModal(false);
+    router.push("/");
+    router.refresh();
   };
 
   const handleCancelLogout = () => {
@@ -115,8 +114,8 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Logout Button - only show if user is logged in AND client-side */}
-          {isClient && user && (
+          {/* Logout Button - only show if user is logged in */}
+          {user && (
             <button
               onClick={handleLogoutClick}
               className="flex flex-col items-center space-y-1 p-2 text-gray-600 hover:text-red-600 transition-colors ml-2"

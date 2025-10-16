@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function RegisterForm() {
-  const { signUp } = useAuth();
+  const router = useRouter();
+  const supabase = createClient();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,20 +28,28 @@ export default function RegisterForm() {
     setLoading(true);
     setError("");
 
-    const result = await signUp(
-      formData.email,
-      formData.password,
-      formData.displayName
-    );
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            displayName: formData.displayName,
+          },
+        },
+      });
 
-    if (result.success) {
-      // User is now logged in, the AuthContext will handle the state update
-      console.log("Registration successful!");
-    } else {
-      setError(result.error);
+      if (error) throw error;
+
+      // Registration successful!
+      console.log("Registration successful!", data);
+      router.push("/feed");
+      router.refresh();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

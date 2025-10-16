@@ -1,7 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { createClient } from "@/lib/supabase/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,16 +18,19 @@ export const metadata = {
   description: "Track your concert experiences",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <main className="pb-20">{children}</main>
-          <Navbar />
-        </AuthProvider>
+        <main className="pb-20">{children}</main>
+        <Navbar user={user} />
       </body>
     </html>
   );
